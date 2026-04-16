@@ -1,0 +1,10 @@
+version: 2.1
+
+description: |
+  The Act Orb enables users to run GitHub Actions natively on CircleCI using the Act CLI.
+  It simplifies integration with the GitHub Actions ecosystem, allowing teams to execute workflows,
+  reuse existing Actions, and bridge CI/CD processes across platforms—all within CircleCI.
+
+display:
+  home_url: "https://nektosact.com/"
+  source_url: "https://github.com/CircleCI-Public/act-orb"
