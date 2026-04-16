@@ -84,7 +84,7 @@ workflows:
           context: orb-publisher
           release_environment: orbs-dev
           github_token: GHI_TOKEN
-          enable-pr-comment: false
+          enable_pr_comment: false
       - orb-tools/publish:
           name: "Publish Production"
           orb_name: circleci/act
@@ -96,4 +96,4 @@ workflows:
           context: orb-publisher
           filters: *release-filters
           github_token: GHI_TOKEN
-          enable-pr-comment: false
+          enable_pr_comment: false
