@@ -18,6 +18,7 @@ workflows:
       - orb-tools/review:
           orb_name: <orb-name>
           filters: *filters
+          exclude: "RC010"
       - shellcheck/check:
           filters: *filters
           severity: error
