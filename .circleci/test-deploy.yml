@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   # Your orb will be automatically injected here during the pipeline.
   # Reference your orb's jobs and commands below as they will exist when built.
-  orb-tools: circleci/orb-tools@12.4
+  orb-tools: circleci/orb-tools@12.3
   # The orb definition is intentionally not included here. It will be injected into the pipeline.
   act: {}
 
@@ -19,31 +19,31 @@ release-filters: &release-filters
   tags:
     only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
 
-# jobs:
-#   # Create jobs to test the commands of your orbs.
-#   # You may want to add additional validation steps to ensure the commands are working as expected.
-#   run_on_remote_docker:
-#     docker:
-#       - image: cimg/base:current
-#     steps:
-#       - setup_remote_docker
-#       - act/act:
-#           uses: actions/hello-world-javascript-action@v1.1
-#           with: |
-#             who-to-greet: "Mona the Octocat"
-#           env: |
-#             hello-world: "example-value"
-#           force-install: false
-#           debug: true
+jobs:
+  # Create jobs to test the commands of your orbs.
+  # You may want to add additional validation steps to ensure the commands are working as expected.
+  run_on_remote_docker:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - setup_remote_docker
+      - act/act:
+          uses: actions/hello-world-javascript-action@v1.1
+          with: |
+            who-to-greet: "Mona the Octocat"
+          env: |
+            hello-world: "example-value"
+          force-install: false
+          debug: true
   
 workflows:
   test-deploy:
     jobs:
       # Make sure to include "filters: *filters" in every test job you want to run as part of your deployment.
       # Test your orb's commands in a custom job and test your orb's jobs directly as a part of this workflow.
-      # - run_on_remote_docker:
-      #     name: Testing Remote Docker
-      #     filters: *filters
+      - run_on_remote_docker:
+          name: Testing Remote Docker
+          filters: *filters
       - act/act:
           name: Testing Overriding Executor
           uses: actions/hello-world-javascript-action@v1.1
