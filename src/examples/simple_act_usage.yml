@@ -5,7 +5,7 @@ description: |
 usage:
   version: 2.1
   orbs:
-    act: circleci/act@x.y.z
+    act: circleci/act@1.0.0
   workflows:
     main:
       jobs:
