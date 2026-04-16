@@ -1,0 +1,18 @@
+description: Default executor environment for running the Act Orb using machine executors
+parameters:
+  image:
+    type: string
+    default: ubuntu-2404:current
+    description: Specifies the machine image to use for the executor
+  docker_layer_caching:
+    type: boolean
+    default: false
+    description: Enables Docker layer caching during builds
+  resource_class:
+    type: string
+    default: large
+    description: Specifies the resource class for the executor
+machine:
+  image: << parameters.image >>
+  docker_layer_caching: << parameters.docker_layer_caching >>
+resource_class: << parameters.resource_class >>

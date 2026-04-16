@@ -1,0 +1,99 @@
+version: 2.1
+orbs:
+  # Your orb will be automatically injected here during the pipeline.
+  # Reference your orb's jobs and commands below as they will exist when built.
+  orb-tools: circleci/orb-tools@12.4
+  # The orb definition is intentionally not included here. It will be injected into the pipeline.
+  act: {}
+
+# Use this tag to ensure test jobs always run,
+# even though the downstream publish job will only run on release tags.
+filters: &filters
+  tags:
+    only: /.*/
+
+# Filter for release tags.
+release-filters: &release-filters
+  branches:
+    ignore: /.*/
+  tags:
+    only: /^v[0-9]+\.[0-9]+\.[0-9]+$/
+
+jobs:
+  # Create jobs to test the commands of your orbs.
+  # You may want to add additional validation steps to ensure the commands are working as expected.
+  run-on-remote-docker:
+    docker:
+      - image: cimg/base:current
+    steps:
+      - setup_remote_docker
+      - act/act:
+          uses: actions/hello-world-javascript-action@v1.1
+          with: |
+            who-to-greet: "Mona the Octocat"
+          env: |
+            hello-world: "example-value"
+          force-install: false
+          debug: true
+  
+workflows:
+  test-deploy:
+    jobs:
+      # Make sure to include "filters: *filters" in every test job you want to run as part of your deployment.
+      # Test your orb's commands in a custom job and test your orb's jobs directly as a part of this workflow.
+      - run-on-remote-docker:
+          name: Testing Remote Docker
+          filters: *filters
+      - act/act:
+          name: Testing Overriding Executor
+          uses: actions/hello-world-javascript-action@v1.1
+          with: |
+            who-to-greet: "Mona the Octocat"
+          env: |
+            hello: world
+          executor:
+            name: act/default
+            image: android:2025.10.1
+            resource_class: medium 
+            docker_layer_caching: true
+          force-install: true
+          debug: true
+          filters: *filters
+      - act/act:
+          name: Testing Running Workflow File
+          workflow-file: .github/workflows/hello-world.yml
+          skip-create-workflow-file: true
+          force-install: false
+          debug: true
+          filters: *filters
+      # The orb must be re-packed for publishing, and saved to the workspace.
+      - orb-tools/pack:
+          filters: *filters
+          requires:
+            - "Testing Remote Docker"
+            - "Testing Overriding Executor"
+            - "Testing Running Workflow File"
+      - orb-tools/publish:
+          name: "Publish Dev"
+          orb_name: circleci/act
+          vcs_type: << pipeline.project.type >>
+          pub_type: dev
+          # Ensure this job requires all test jobs and the pack job.
+          requires:
+            - orb-tools/pack
+          context: orb-publisher
+          release_environment: orbs-dev
+          github_token: GHI_TOKEN
+          enable_pr_comment: false
+      - orb-tools/publish:
+          name: "Publish Production"
+          orb_name: circleci/act
+          vcs_type: << pipeline.project.type >>
+          pub_type: production
+          # Ensure this job requires all test jobs and the pack job.
+          requires:
+            - orb-tools/pack
+          context: orb-publisher
+          filters: *release-filters
+          github_token: GHI_TOKEN
+          enable_pr_comment: false
